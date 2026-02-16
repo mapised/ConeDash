@@ -1,5 +1,5 @@
 local startup = require("startup")
-local camera = require("src/camera")
+local camera = require("lib/camera")
 
 local gameStates = {
     ["game"] = require("src/game"),
@@ -68,4 +68,21 @@ end
 
 function love.resize()
     camera.resize()
+end
+
+--
+local lldebugger = require("lldebugger")
+
+if arg[2] == "debug" then
+    lldebugger.start()
+end
+
+local love_errorhandler = love.errorhandler
+
+function love.errorhandler(msg)
+    if lldebugger then
+        error(msg, 2)
+    else
+        return love_errorhandler(msg)
+    end
 end

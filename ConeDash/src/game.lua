@@ -1,8 +1,7 @@
 local assets = require("src/utils/assets")
-local physics = require("src/utils/physics")
 local constants = require("src/utils/constants")
 local player = require("src/gamemodes/player")
-local camera = require("src/camera")
+local camera = require("lib/camera")
 
 local game = {}
 
@@ -15,7 +14,7 @@ game.objects = {}
 function game.reset()
     if game.level then
         love.audio.stop(music[game.level.song])
-        --love.audio.play(music[game.level.song])
+        love.audio.play(music[game.level.song])
         game.player.x, game.player.y = 0, (camera.height - (constants.blockSize / 2))
         game.player.grounded = false
     end
@@ -31,7 +30,7 @@ function game.enter(previousState, selectedLevel, startX, startY)
             game.reset()
             if startX and startY then
                 game.player.x, game.player.y = startX, startY
-                local songPos = math.max((startX / (physics.scrollSpeed * 60)), 0)
+                local songPos = math.max((startX / (constants.scrollSpeed * 60)), 0)
                 music[game.level.song]:seek(songPos, "seconds")
             end
             return true
@@ -60,7 +59,9 @@ function game.update(deltaTime)
     game.player:update(deltaTime)
 
     local x, y = game.player.body:getPosition()
-    camera.setPosition(x - (camera.width / 3), (camera.height - (constants.blockSize / 2)) - ((camera.height / 3) * 2))
+    local targetY = (math.max((camera.height - y) - 450, constants.blockSize / 2))
+
+    camera.setPosition(x - (camera.width / 3), (camera.height - targetY) - ((camera.height / 3) * 2))
 
     for _, object in pairs(game.objects) do
         if object.update then
@@ -71,7 +72,7 @@ end
 
 function game.draw() 
     love.graphics.setBackgroundColor(0, 0, 0.5)
-    love.graphics.draw(sprites.gavin, camera.x, camera.y, 0, (camera.width / sprites.gavin:getWidth()), (camera.height / sprites.gavin:getHeight()))
+    love.graphics.draw(sprites.gavin, camera.x, camera.y, 0, (camera.width / sprites.gavin:getWidth()), (camera.width / sprites.gavin:getHeight()))
     do -- Draw level stuff
         game.player:draw()
         for _, object in pairs(game.objects) do
@@ -81,6 +82,9 @@ function game.draw()
         end
     end
     love.graphics.draw(sprites.floorLine, camera.x + (camera.width / 2), camera.height, 0, 1, 1, sprites.floorLine:getWidth() / 2, sprites.floorLine:getHeight())
+    love.graphics.setColor(1, 0, 0, 0.5)
+    love.graphics.rectangle("fill", camera.x, camera.height, camera.width, camera.height)
+    love.graphics.setColor(1, 1, 1, 1)
     -- Draw UI
     camera.reset()
     love.graphics.print("Hello!", 200, 300)

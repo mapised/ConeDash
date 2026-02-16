@@ -1,5 +1,3 @@
-local camera = require("src/camera")
-local physics = require("src/utils/physics")
 local constants = require("src/utils/constants")
 
 local function snapRotation(angle)
@@ -17,19 +15,19 @@ end
 function Cube:jump()
     if self.grounded then
         self.grounded = false
-        self.yVel = physics.jumpVelocity * self.gravity
+        self.yVel = constants.jumpVelocity * self.gravity
     end
 end
 
 function Cube:update(scale, deltaTime)
     if not self.grounded then
-        self.targetRotation = self.rotation + ((physics.rotationSpeed * deltaTime) * self.gravity)
-        self.yVel = self.yVel - ((physics.gravity * self.gravity) * scale)
+        self.targetRotation = self.rotation + ((constants.rotationSpeed * deltaTime) * self.gravity)
+        self.yVel = self.yVel - ((constants.gravity * self.gravity) * scale)
 
-        if self.yVel > physics.terminalVelocity then
-            self.yVel = physics.terminalVelocity
-        elseif self.yVel < -physics.terminalVelocity then
-            self.yVel = -physics.terminalVelocity
+        if self.yVel > constants.terminalVelocity then
+            self.yVel = constants.terminalVelocity
+        elseif self.yVel < -constants.terminalVelocity then
+            self.yVel = -constants.terminalVelocity
         end
     else
         self.targetRotation = snapRotation(self.rotation)

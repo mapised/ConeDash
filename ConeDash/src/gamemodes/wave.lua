@@ -1,10 +1,4 @@
-local physics = require("src/utils/physics")
 local constants = require("src/utils/constants")
-
-local function snapRotation(angle)
-    local quarterTurn = math.pi / 2
-    return math.floor(angle / quarterTurn + 0.5) * quarterTurn
-end
 
 local Object = require("lib/classic")
 local Wave = Object:extend()
@@ -38,10 +32,10 @@ function Wave:update(scale, deltaTime)
         self.targetRotation = math.pi / 2
     else
         if self.jumping then
-            self.yVel = (physics.scrollSpeed * self.gravity)
+            self.yVel = (constants.scrollSpeed * self.gravity)
             self.targetRotation = math.pi / 4
         else
-            self.yVel = (-physics.scrollSpeed * self.gravity)
+            self.yVel = (-constants.scrollSpeed * self.gravity)
             self.targetRotation = math.pi / 1.33
         end
     end

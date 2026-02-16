@@ -1,7 +1,6 @@
-local camera = require("src/camera")
 local constants = require("src/utils/constants")
 local assets = require("src/utils/assets")
-local physics = require("src/utils/physics")
+local camera = require("lib/camera")
 
 local Object = require("lib/classic")
 local Player = Object:extend()
@@ -9,6 +8,7 @@ local Player = Object:extend()
 function Player:new()
     self.mode = nil
     self.collisions = 0
+    self.invincibilityFrames = 0
     self.x, self.y = 0, 0
     self.xVel, self.yVel = 0, 0
 
@@ -45,8 +45,11 @@ end
 
 function Player:update(deltaTime)
     local scale = deltaTime * 60
-    self.xVel = (physics.scrollSpeed * self.moveDirection)
+    self.xVel = (constants.scrollSpeed * self.moveDirection)
 
+    if self.invincibilityFrames > 0 then
+        self.invincibilityFrames = self.invincibilityFrames - 1
+    end
     if self.jumping then
         self:jump()
     end
@@ -63,7 +66,7 @@ function Player:update(deltaTime)
     end
     self.body:setPosition(self.x, self.y)
     -- bodys refuse work unless i do this
-    self.body:setLinearVelocity(0.1, 0)
+    self.body:setLinearVelocity(self.xVel, self.yVel)
 end
 
 function Player:draw()
@@ -82,8 +85,10 @@ function Player:setMode(mode)
 end
 
 function Player:die()
-    self.collisions = 0
-    gameState.reset()
+    if self.invincibilityFrames <= 0 then
+        self.collisions = 0
+        gameState.reset()
+    end
 end
 
 function Player:destroy()

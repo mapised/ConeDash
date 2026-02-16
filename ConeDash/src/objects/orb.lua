@@ -1,16 +1,15 @@
-local camera = require("src/camera")
 local constants = require("src/utils/constants")
-local physics = require("src/utils/physics")
+local camera = require("lib/camera")
 
 local Object = require("src/objects/object")
 local Orb = Object:extend()
 
-function Orb:new(id, args, x, y)
-    Orb.super.new(self, id, args)
-    self.velocity = physics.jumpVelocity * args[2]
-
-    self.data = {x, y}
-    self.x, self.y = x * constants.blockSize, camera.height - (y * constants.blockSize)
+function Orb:new(id, args, x, y, rotation)
+    Orb.super.new(self, id, args, x, y, rotation)
+    self.type = args[2]
+    if self.type == constants.orbTypes.jump then
+        self.velocity = constants.jumpVelocity * args[3]
+    end
 end
 
 function Orb:check()
@@ -24,17 +23,30 @@ function Orb:check()
     return false
 end
 
+function Orb:jump()
+    gameState.player.grounded = false
+    if self.type == constants.orbTypes.jump then
+        gameState.player.yVel = self.velocity
+        gameState.player.y = gameState.player.y - 1
+    else
+        gameState.player.invincibilityFrames = 10
+        gameState.player.gravity = -gameState.player.gravity
+        if not self.body then -- this behavior only applies to orbs
+            gameState.player.yVel = -constants.jumpVelocity * gameState.player.gravity
+        end
+    end
+end
+
 function Orb:onJump()
     if self:check() then
-        gameState.player.grounded = false
-        gameState.player.yVel = self.velocity
+        self:jump()
     end
 end
 
 function Orb:draw()
     local width, height = ((constants.blockSize) / self.sprite:getWidth()), ((constants.blockSize) / self.sprite:getHeight())
     
-    love.graphics.draw(self.sprite, self.x, self.y, 0, width, height, self.sprite:getWidth() / 2, self.sprite:getHeight() / 2)
+    love.graphics.draw(self.sprite, self.x, self.y, self.rotation, width, height, self.sprite:getWidth() / 2, self.sprite:getHeight() / 2)
 end
 
 return Orb
